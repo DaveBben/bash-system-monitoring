@@ -43,6 +43,13 @@ freq=$(lscpu | grep "MHz". | head -n 1 | awk '{print $3}')
 cpu=$(top -d 0.5 -b -n3 | grep "Cpu(s)"|tail -n 1 | awk '{print 100-$8}')
 ############################################################
 
+
+gpuinfo=$(nvidia-smi --format=csv --query-gpu=utilization.gpu,temperature.gpu,utilization.memory)
+gpu_usage=$(echo "$gpuinfo" | tail -n1 | awk '{print $1}')
+gpu_temp=$(echo "$gpuinfo" | tail -n1 | awk '{print $3}')
+gpu_mem_usage=$(echo "$gpuinfo" | tail -n1 | awk '{print $4}')
+
 echo "CPU%: ${cpu}, CPU Frequency (GHZ): ${freq}, Memory%: ${percentmem}, Temperature (C): ${temp}"
+echo "GPU%: ${gpu_usage},  GPU Memory%: ${gpu_mem_usage}, GPU Temperature (C): ${gpu_temp}"
 sleep 1
 done
