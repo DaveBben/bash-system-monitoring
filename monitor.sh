@@ -49,7 +49,15 @@ gpu_usage=$(echo "$gpuinfo" | tail -n1 | awk '{print $1}')
 gpu_temp=$(echo "$gpuinfo" | tail -n1 | awk '{print $3}')
 gpu_mem_usage=$(echo "$gpuinfo" | tail -n1 | awk '{print $4}')
 
-echo "CPU%: ${cpu}, CPU Frequency (GHZ): ${freq}, Memory%: ${percentmem}, Temperature (C): ${temp}"
+echo "CPU%: ${cpu}, CPU Frequency (MHZ): ${freq}, Memory%: ${percentmem}, Temperature (C): ${temp}"
 echo "GPU%: ${gpu_usage},  GPU Memory%: ${gpu_mem_usage}, GPU Temperature (C): ${gpu_temp}"
+
+
+data=(${cpu} ${freq} ${percentmem} ${temp} ${gpu_usage} ${gpu_mem_usage} ${gpu_temp})
+printf -v joined '%.0f,' "${data[@]}"
+
+
+echo "${joined%,}" > /dev/ttyACM0
+
 sleep 1
 done
