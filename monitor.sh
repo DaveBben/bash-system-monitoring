@@ -43,21 +43,28 @@ freq=$(lscpu | grep "MHz". | head -n 1 | awk '{print $3}')
 cpu=$(top -d 0.5 -b -n3 | grep "Cpu(s)"|tail -n 1 | awk '{print 100-$8}')
 ############################################################
 
-
+############################
+### GPU Usage
+############################
+# Requires nvidia-smi to query GPU information
 gpuinfo=$(nvidia-smi --format=csv --query-gpu=utilization.gpu,temperature.gpu,utilization.memory)
 gpu_usage=$(echo "$gpuinfo" | tail -n1 | awk '{print $1}')
-gpu_temp=$(echo "$gpuinfo" | tail -n1 | awk '{print $3}')
+gpu_temp=$(echo "$gpuinfo" | tail -n1 | awk '{print $3}' | sed 's/,/ /g') # for some reason there's a trailing comma
 gpu_mem_usage=$(echo "$gpuinfo" | tail -n1 | awk '{print $4}')
+##############################################
 
 echo "CPU%: ${cpu}, CPU Frequency (MHZ): ${freq}, Memory%: ${percentmem}, Temperature (C): ${temp}"
 echo "GPU%: ${gpu_usage},  GPU Memory%: ${gpu_mem_usage}, GPU Temperature (C): ${gpu_temp}"
 
 
 data=(${cpu} ${freq} ${percentmem} ${temp} ${gpu_usage} ${gpu_mem_usage} ${gpu_temp})
+# Comma seperate each value in the array and round to nearest int
 printf -v joined '%.0f,' "${data[@]}"
 
 
-echo "${joined%,}" > /dev/ttyACM0
+# Ouput device information to serial port
+# This is specifically for a project that I'm working on
+echo "[${joined%,}]" > /dev/ttyACM0
 
 sleep 1
 done
